@@ -26,10 +26,31 @@ export type AiResult = {
   outputTokens: number
 }
 
+export type WebSearchRequest = {
+  system?: string
+  prompt: string
+  /** Upper limit on searches the model may run, which is also the upper limit on search cost */
+  maxSearches?: number
+  maxTokens?: number
+}
+
+export type WebSearchResult = {
+  text: string
+  /** Every page URL the searches returned. Anything the model reports must come from here. */
+  urls: string[]
+  searches: number
+  provider: ProviderId
+  model: string
+  inputTokens: number
+  outputTokens: number
+}
+
 export interface AiProvider {
   readonly id: ProviderId
   readonly model: string
   generate(request: AiRequest): Promise<AiResult>
+  /** Only providers that can search the web have this */
+  webSearch?(request: WebSearchRequest): Promise<WebSearchResult>
 }
 
 /** `retryable` errors (rate limit, overload, network) may fall back to another provider. */

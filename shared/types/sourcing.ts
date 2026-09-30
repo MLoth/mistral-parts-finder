@@ -59,4 +59,5 @@ export type SourceInfo = {
   description: string
   demo: boolean
   enabled: boolean
+  costNote?: string
 }

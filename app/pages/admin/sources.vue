@@ -35,6 +35,14 @@ async function toggle(source: SourceInfo, enabled: boolean) {
       :title="source.name"
       :description="source.description"
     >
+      <UAlert
+        v-if="source.costNote"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-coins"
+        :description="source.costNote"
+        class="mb-3"
+      />
       <div class="flex items-center justify-between">
         <div class="flex gap-2">
           <UBadge
