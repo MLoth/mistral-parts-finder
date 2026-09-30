@@ -1,18 +1,28 @@
 <script setup lang="ts">
-import type { SourceRun } from '#shared/types/sourcing'
+import type { SourceResult, SourceRun } from '#shared/types/sourcing'
 
-defineProps<{ run: SourceRun }>()
+defineProps<{ run: SourceRun, savedIds?: string[] }>()
+defineEmits<{ save: [result: SourceResult] }>()
 
 const KIND = { webshop: 'Webshop', marketplace: 'Marktplaats', seller: 'Verkoper', forum: 'Forum' } as const
 const CONDITION = { new: 'Nieuw', used: 'Gebruikt', refurbished: 'Gereviseerd' } as const
 const money = (p: { amount: number, currency: string }) =>
   new Intl.NumberFormat('nl-NL', { style: 'currency', currency: p.currency }).format(p.amount)
+const scoreColor = (n = 0) => (n >= 70 ? 'success' : n >= 40 ? 'warning' : 'neutral')
 </script>
 
 <template>
   <div class="space-y-3">
+    <UAlert
+      v-if="run.ranking === 'heuristic'"
+      color="warning"
+      variant="subtle"
+      icon="i-lucide-triangle-alert"
+      description="De AI-beoordeling mislukte. De volgorde is een schatting op basis van de zoektermen."
+    />
+
     <div class="flex flex-wrap items-center gap-2 text-sm text-muted">
-      <span>{{ run.results.length }} resultaten</span>
+      <span>{{ run.results.length }} resultaten, beste eerst</span>
       <UBadge
         v-for="s in run.statuses"
         :key="s.sourceId"
@@ -36,12 +46,20 @@ const money = (p: { amount: number, currency: string }) =>
             rel="noopener noreferrer"
             class="font-semibold text-primary hover:underline"
           >{{ r.title }}</a>
-          <span
-            v-if="r.price"
-            class="font-semibold"
-          >{{ money(r.price) }}</span>
+          <div class="flex items-center gap-2">
+            <span
+              v-if="r.price"
+              class="font-semibold"
+            >{{ money(r.price) }}</span>
+            <UBadge
+              v-if="r.score !== undefined"
+              :label="`Match ${r.score}%`"
+              :color="scoreColor(r.score)"
+              variant="subtle"
+            />
+          </div>
         </div>
-        <div class="flex flex-wrap gap-1">
+        <div class="flex flex-wrap items-center gap-1">
           <UBadge
             :label="KIND[r.kind]"
             color="neutral"
@@ -53,13 +71,21 @@ const money = (p: { amount: number, currency: string }) =>
             color="neutral"
             variant="outline"
           />
-          <UBadge
-            v-if="r.location"
-            :label="r.location"
-            color="neutral"
-            variant="outline"
+          <CountryLabel
+            :code="r.countryCode"
+            :location="r.location"
           />
         </div>
+        <p
+          v-if="r.reason"
+          class="flex gap-1"
+        >
+          <UIcon
+            name="i-lucide-lightbulb"
+            class="mt-0.5 shrink-0 text-primary"
+          />
+          <span>{{ r.reason }}</span>
+        </p>
         <p class="text-muted">
           {{ r.sourceName }}<template v-if="r.alsoFoundOn.length">
             (ook bij {{ r.alsoFoundOn.join(', ') }})
@@ -70,6 +96,15 @@ const money = (p: { amount: number, currency: string }) =>
         <p v-if="r.snippet">
           {{ r.snippet }}
         </p>
+        <UButton
+          :label="savedIds?.includes(r.id) ? 'Opgeslagen' : 'Opslaan bij onderdeel'"
+          :icon="savedIds?.includes(r.id) ? 'i-lucide-check' : 'i-lucide-bookmark'"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          :disabled="savedIds?.includes(r.id)"
+          @click="$emit('save', r)"
+        />
       </li>
     </ul>
   </div>

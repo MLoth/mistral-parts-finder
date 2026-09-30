@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Part, Project } from '#shared/types/project'
 import type { PartSearch } from '#shared/types/search'
+import type { ContactOutcome, SavedResult } from '#shared/types/saved'
+import type { SourceResult } from '#shared/types/sourcing'
 
 const route = useRoute()
 const api = useApi()
@@ -21,6 +23,38 @@ const { data: searches, refresh } = await useAsyncData(
   () => api<PartSearch[]>(`/api/projects/${projectId}/parts/${partId}/searches`),
   { server: false }
 )
+
+const { data: saved, refresh: refreshSaved } = await useAsyncData(
+  `saved-${partId}`,
+  () => api<SavedResult[]>(`/api/projects/${projectId}/parts/${partId}/saved`),
+  { server: false }
+)
+const savedIds = computed(() => (saved.value ?? []).map(s => s.id))
+const savedBase = `/api/projects/${projectId}/parts/${partId}/saved`
+
+async function saveResult(search: PartSearch, result: SourceResult) {
+  try {
+    await api(savedBase, { method: 'POST', body: { searchId: search.id, resultId: result.id } })
+    toast.add({ title: 'Resultaat opgeslagen' })
+    await refreshSaved()
+  } catch (error) {
+    toast.add({ title: 'Opslaan mislukt', description: errorMessage(error), color: 'error' })
+  }
+}
+
+async function removeSaved(id: string) {
+  await api(`${savedBase}/${id}`, { method: 'DELETE' })
+  await refreshSaved()
+}
+
+async function addContact(id: string, entry: { note: string, outcome: ContactOutcome }) {
+  try {
+    await api(`${savedBase}/${id}/contacts`, { method: 'POST', body: entry })
+    await refreshSaved()
+  } catch (error) {
+    toast.add({ title: 'Vastleggen mislukt', description: errorMessage(error), color: 'error' })
+  }
+}
 
 const base = `/api/projects/${projectId}/parts/${partId}/searches`
 
@@ -121,6 +155,20 @@ async function adoptPartNumber(number: string) {
         </template>
       </p>
     </div>
+
+    <section
+      v-if="saved?.length"
+      class="space-y-3"
+    >
+      <h2 class="text-lg">
+        Opgeslagen resultaten
+      </h2>
+      <SavedResults
+        :saved="saved"
+        @remove="removeSaved"
+        @contact="addContact"
+      />
+    </section>
 
     <UPageCard
       title="Nieuwe zoekopdracht"
@@ -224,6 +272,8 @@ async function adoptPartNumber(number: string) {
         <SourceResults
           v-if="search.sources"
           :run="search.sources"
+          :saved-ids="savedIds"
+          @save="saveResult(search, $event)"
         />
       </div>
 

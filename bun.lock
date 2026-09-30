@@ -6,6 +6,7 @@
       "name": "mistral-parts-finder",
       "dependencies": {
         "@anthropic-ai/sdk": "^0.129.0",
+        "@iconify-json/circle-flags": "^1.2.11",
         "@iconify-json/lucide": "^1.2.137",
         "@iconify-json/simple-icons": "^1.2.97",
         "@nuxt/ui": "^4.11.2",
@@ -316,6 +317,8 @@
     "@humanwhocodes/module-importer": ["@humanwhocodes/module-importer@1.0.1", "", {}, "sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA=="],
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
+
+    "@iconify-json/circle-flags": ["@iconify-json/circle-flags@1.2.11", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-vrx2btOkTQ4/P75ElEDnjXShmNTwInXuhhpIQQ6U6YUTdxfWyvm/4ijNG8FX8iWFr+sqqQRCvXpm2RfRtjVXfg=="],
 
     "@iconify-json/lucide": ["@iconify-json/lucide@1.2.137", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-uKz1+tFbv1RFX/mJQNksdnyKJijNfRGSNnxfiyKtr+dLNfA3ERph+IgpXClKGOlV/5GsZwLv2jgJXQ/bjF/JAg=="],
 
