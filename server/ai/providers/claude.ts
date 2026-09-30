@@ -10,11 +10,20 @@ function toBlock(part: AiContentPart): Anthropic.ContentBlockParam {
 
 export function createClaudeProvider(apiKey: string, model: string): AiProvider {
   const client = new Anthropic({ apiKey })
+  // Haiku 4.5 rejects the effort parameter (it only exists on the larger models)
+  const supportsEffort = !model.startsWith('claude-haiku')
 
   return {
     id: 'claude',
     model,
     async generate(request: AiRequest) {
+      const outputConfig = supportsEffort || request.jsonSchema
+        ? {
+            ...(supportsEffort && { effort: request.effort ?? 'medium' }),
+            ...(request.jsonSchema && { format: { type: 'json_schema' as const, schema: request.jsonSchema } })
+          }
+        : undefined
+
       try {
         const response = await client.messages.create({
           model,
@@ -24,10 +33,7 @@ export function createClaudeProvider(apiKey: string, model: string): AiProvider 
             role: m.role,
             content: typeof m.content === 'string' ? m.content : m.content.map(toBlock)
           })),
-          output_config: {
-            effort: request.effort ?? 'medium',
-            ...(request.jsonSchema && { format: { type: 'json_schema', schema: request.jsonSchema } })
-          }
+          ...(outputConfig && { output_config: outputConfig })
         })
 
         if (response.stop_reason === 'refusal') {
