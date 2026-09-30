@@ -11,6 +11,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
     "@iconify-json/lucide": "^1.2.137",
     "@iconify-json/simple-icons": "^1.2.97",
     "@nuxt/ui": "^4.11.2",

@@ -46,6 +46,13 @@ async function onSignOut() {
           variant="ghost"
         />
         <UButton
+          v-if="isAdmin"
+          to="/admin/ai"
+          label="AI"
+          color="neutral"
+          variant="ghost"
+        />
+        <UButton
           v-if="user"
           label="Sign out"
           color="neutral"

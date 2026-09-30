@@ -17,6 +17,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     firebaseClientEmail: '',
     firebasePrivateKey: '',
+    // 32 bytes, base64: encrypts AI API keys stored in Firestore
+    encryptionKey: '',
     public: {
       firebaseApiKey: '',
       firebaseAuthDomain: '',
