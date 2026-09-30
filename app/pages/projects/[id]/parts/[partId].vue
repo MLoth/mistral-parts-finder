@@ -26,6 +26,15 @@ const { data: searches, refresh } = await useAsyncData(`searches-${partId}`, () 
 const { data: saved, refresh: refreshSaved } = await useAsyncData(`saved-${partId}`, () => api<SavedResult[]>(savedBase), { server: false })
 const savedIds = computed(() => (saved.value ?? []).map(s => s.id))
 
+// While a lookup runs in the background, check on it every two seconds
+const anyRunning = computed(() => !!searches.value?.some(s => s.job?.status === 'running'))
+let poll: ReturnType<typeof setInterval> | undefined
+watch(anyRunning, (running) => {
+  clearInterval(poll)
+  if (running) poll = setInterval(() => refresh(), 2000)
+}, { immediate: true })
+onBeforeUnmount(() => clearInterval(poll))
+
 // Which search is shown, and whether the "new search" form is open
 const activeId = ref<string | null>(null)
 const creating = ref(false)

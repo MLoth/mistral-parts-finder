@@ -18,6 +18,10 @@ const answer = ref('')
 const answerImages = ref<UploadImage[]>([])
 const refining = ref(false)
 const finding = ref(false)
+const running = computed(() => props.search.job?.status === 'running')
+const partialRun = computed(() => props.search.job?.partial.length
+  ? { at: props.search.job.startedAt, queries: [], statuses: [], results: props.search.job.partial }
+  : undefined)
 
 async function refine() {
   refining.value = true
@@ -40,6 +44,7 @@ async function findSources() {
   finding.value = true
   try {
     await api(`${props.base}/${props.search.id}/sources`, { method: 'POST' })
+    // The lookup continues in the background; the page follows its progress
     emit('changed')
   } catch (error) {
     toast.add({ title: 'Bronnen doorzoeken mislukt', description: apiError(error), color: 'error' })
@@ -178,16 +183,31 @@ async function findSources() {
         :hint="search.sources ? `Laatst doorzocht op ${new Date(search.sources.at).toLocaleString()}` : 'Zoek met deze herkenning naar winkels en verkopers.'"
       />
       <UButton
-        :label="search.sources ? 'Opnieuw doorzoeken' : 'Bronnen doorzoeken'"
+        :label="running ? 'Bezig…' : search.sources ? 'Opnieuw doorzoeken' : 'Bronnen doorzoeken'"
         icon="i-lucide-store"
         size="lg"
         :color="search.sources ? 'neutral' : 'primary'"
         :variant="search.sources ? 'subtle' : 'solid'"
-        :loading="finding"
+        :loading="finding || running"
+        :disabled="running"
         @click="findSources"
       />
+      <JobProgress
+        v-if="search.job && search.job.status !== 'done'"
+        :job="search.job"
+        @retry="findSources"
+      />
+      <template v-if="running && partialRun">
+        <p class="text-sm text-muted">
+          Voorlopige resultaten, nog niet beoordeeld en niet op volgorde:
+        </p>
+        <SourceResults
+          :run="partialRun"
+          readonly
+        />
+      </template>
       <SourceResults
-        v-if="search.sources"
+        v-else-if="search.sources"
         :run="search.sources"
         :saved-ids="savedIds"
         @save="emit('save', $event)"

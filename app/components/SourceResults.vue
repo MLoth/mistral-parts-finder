@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SourceResult, SourceRun } from '#shared/types/sourcing'
 
-defineProps<{ run: SourceRun, savedIds?: string[] }>()
+defineProps<{ run: SourceRun, savedIds?: string[], readonly?: boolean }>()
 defineEmits<{ save: [result: SourceResult] }>()
 
 const KIND = { webshop: 'Webshop', marketplace: 'Marktplaats', seller: 'Verkoper', forum: 'Forum' } as const
@@ -114,6 +114,7 @@ const scoreColor = (n = 0) => (n >= 70 ? 'success' : n >= 40 ? 'warning' : 'neut
           {{ r.snippet }}
         </p>
         <UButton
+          v-if="!readonly"
           :label="savedIds?.includes(r.id) ? 'Opgeslagen' : 'Opslaan bij onderdeel'"
           :icon="savedIds?.includes(r.id) ? 'i-lucide-check' : 'i-lucide-bookmark'"
           size="xs"
