@@ -9,7 +9,7 @@ export async function requireUser(event: H3Event, opts: { admin?: boolean } = {}
   if (!token) throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
 
   try {
-    const decoded = await useFirebaseAdmin().verifyIdToken(token)
+    const decoded = await useFirebaseAdmin().verifyIdToken(token, true)
     const user: SessionUser = {
       uid: decoded.uid,
       email: decoded.email,

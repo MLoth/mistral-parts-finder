@@ -12,6 +12,7 @@
         "firebase-admin": "^14.5.0",
         "nuxt": "^4.5.2",
         "tailwindcss": "^4.3.3",
+        "zod": "^4.6.5",
       },
       "devDependencies": {
         "@nuxt/eslint": "^1.17.0",

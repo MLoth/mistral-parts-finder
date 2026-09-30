@@ -21,7 +21,7 @@ useSeoMeta({
   ogDescription: description
 })
 
-const { user, signOut } = useAuth()
+const { user, isAdmin, signOut } = useAuth()
 
 async function onSignOut() {
   await signOut()
@@ -38,6 +38,13 @@ async function onSignOut() {
 
       <template #right>
         <UColorModeButton />
+        <UButton
+          v-if="isAdmin"
+          to="/admin/users"
+          label="Users"
+          color="neutral"
+          variant="ghost"
+        />
         <UButton
           v-if="user"
           label="Sign out"
