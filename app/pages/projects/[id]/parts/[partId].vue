@@ -19,27 +19,41 @@ const { data: projectData } = await useAsyncData(
 const project = computed(() => projectData.value?.project)
 const part = computed(() => projectData.value?.parts.find(p => p.id === partId))
 
-const { data: searches, refresh } = await useAsyncData(
-  `searches-${partId}`,
-  () => api<PartSearch[]>(`/api/projects/${projectId}/parts/${partId}/searches`),
-  { server: false }
-)
-
-const { data: saved, refresh: refreshSaved } = await useAsyncData(
-  `saved-${partId}`,
-  () => api<SavedResult[]>(`/api/projects/${projectId}/parts/${partId}/saved`),
-  { server: false }
-)
-const savedIds = computed(() => (saved.value ?? []).map(s => s.id))
+const base = `/api/projects/${projectId}/parts/${partId}/searches`
 const savedBase = `/api/projects/${projectId}/parts/${partId}/saved`
 
-async function saveResult(search: PartSearch, result: SourceResult) {
+const { data: searches, refresh } = await useAsyncData(`searches-${partId}`, () => api<PartSearch[]>(base), { server: false })
+const { data: saved, refresh: refreshSaved } = await useAsyncData(`saved-${partId}`, () => api<SavedResult[]>(savedBase), { server: false })
+const savedIds = computed(() => (saved.value ?? []).map(s => s.id))
+
+// Which search is shown, and whether the "new search" form is open
+const activeId = ref<string | null>(null)
+const creating = ref(false)
+const active = computed(() => searches.value?.find(s => s.id === activeId.value) ?? searches.value?.[0])
+const showForm = computed(() => creating.value || (!!searches.value && !searches.value.length))
+
+const tab = ref('search')
+const tabs = computed(() => [
+  { label: 'Zoeken', value: 'search', icon: 'i-lucide-search', slot: 'search' as const },
+  { label: `Opgeslagen (${saved.value?.length ?? 0})`, value: 'saved', icon: 'i-lucide-bookmark', slot: 'saved' as const }
+])
+
+async function onCreated(search: PartSearch) {
+  await refresh()
+  activeId.value = search.id
+  creating.value = false
+}
+
+const searchLabel = (s: PartSearch, i: number) =>
+  `${(searches.value?.length ?? 0) - i}. ${new Date(s.createdAt).toLocaleDateString()}`
+
+async function saveResult(result: SourceResult) {
   try {
-    await api(savedBase, { method: 'POST', body: { searchId: search.id, resultId: result.id } })
-    toast.add({ title: 'Resultaat opgeslagen' })
+    await api(savedBase, { method: 'POST', body: { searchId: active.value!.id, resultId: result.id } })
+    toast.add({ title: 'Resultaat opgeslagen', description: 'Te vinden onder het tabblad Opgeslagen.' })
     await refreshSaved()
   } catch (error) {
-    toast.add({ title: 'Opslaan mislukt', description: errorMessage(error), color: 'error' })
+    toast.add({ title: 'Opslaan mislukt', description: apiError(error), color: 'error' })
   }
 }
 
@@ -53,7 +67,7 @@ async function addContact(id: string, entry: { note: string, outcome: ContactOut
     await api(`${savedBase}/${id}/contacts`, { method: 'POST', body: entry })
     await refreshSaved()
   } catch (error) {
-    toast.add({ title: 'Vastleggen mislukt', description: errorMessage(error), color: 'error' })
+    toast.add({ title: 'Vastleggen mislukt', description: apiError(error), color: 'error' })
   }
 }
 
@@ -63,261 +77,126 @@ async function rateSource(id: string, rating: { verdict: Verdict, reasons: Ratin
     toast.add({ title: 'Beoordeling opgeslagen', description: 'Bij de volgende zoekopdracht telt deze bron mee in de volgorde.' })
     await refreshSaved()
   } catch (error) {
-    toast.add({ title: 'Beoordelen mislukt', description: errorMessage(error), color: 'error' })
+    toast.add({ title: 'Beoordelen mislukt', description: apiError(error), color: 'error' })
   }
 }
 
-const base = `/api/projects/${projectId}/parts/${partId}/searches`
-
-// New search
-const form = reactive({ description: '', partNumber: '', info: '' })
-const newImages = ref<UploadImage[]>([])
-const searching = ref(false)
-
-const strip = (images: UploadImage[]) => images.map(({ mediaType, base64 }) => ({ mediaType, base64 }))
-
-function errorMessage(error: unknown) {
-  return (error as { data?: { statusMessage?: string } })?.data?.statusMessage
-    ?? (error as { statusMessage?: string })?.statusMessage
-    ?? 'Er ging iets mis'
-}
-
-async function startSearch() {
-  searching.value = true
-  try {
-    await api(base, { method: 'POST', body: { ...form, images: strip(newImages.value) } })
-    Object.assign(form, { description: '', partNumber: '', info: '' })
-    newImages.value = []
-    await refresh()
-  } catch (error) {
-    toast.add({ title: 'Zoeken mislukt', description: errorMessage(error), color: 'error' })
-  } finally {
-    searching.value = false
-  }
-}
-
-// Refining an existing search
-const answers = reactive<Record<string, string>>({})
-const answerImages = reactive<Record<string, UploadImage[]>>({})
-const refining = ref<string | null>(null)
-
-async function refine(search: PartSearch) {
-  refining.value = search.id
-  try {
-    await api(`${base}/${search.id}/refine`, {
-      method: 'POST',
-      body: { answer: answers[search.id] ?? '', images: strip(answerImages[search.id] ?? []) }
-    })
-    answers[search.id] = ''
-    answerImages[search.id] = []
-    await refresh()
-  } catch (error) {
-    toast.add({ title: 'Verfijnen mislukt', description: errorMessage(error), color: 'error' })
-  } finally {
-    refining.value = null
-  }
-}
-
-const findingSources = ref<string | null>(null)
-async function findSources(search: PartSearch) {
-  findingSources.value = search.id
-  try {
-    await api(`${base}/${search.id}/sources`, { method: 'POST' })
-    await refresh()
-  } catch (error) {
-    toast.add({ title: 'Bronnen doorzoeken mislukt', description: errorMessage(error), color: 'error' })
-  } finally {
-    findingSources.value = null
-  }
-}
-
-const adopting = ref(false)
 async function adoptPartNumber(number: string) {
-  adopting.value = true
   try {
     await api(`/api/projects/${projectId}/parts/${partId}`, { method: 'PATCH', body: { partNumber: number } })
     toast.add({ title: 'Onderdeelnummer overgenomen' })
     projectData.value = await api(`/api/projects/${projectId}`)
-  } finally {
-    adopting.value = false
+  } catch (error) {
+    toast.add({ title: 'Overnemen mislukt', description: apiError(error), color: 'error' })
   }
 }
 </script>
 
 <template>
-  <UContainer class="py-8 max-w-3xl space-y-6">
-    <UButton
-      :to="`/projects/${projectId}`"
-      :label="project?.name ?? 'Project'"
-      icon="i-lucide-arrow-left"
-      color="neutral"
-      variant="link"
-      class="px-0"
+  <UContainer class="py-8 max-w-4xl space-y-6">
+    <UBreadcrumb
+      :items="[
+        { label: 'Projecten', to: '/' },
+        { label: project?.name ?? '…', to: `/projects/${projectId}` },
+        { label: part?.name ?? '…' }
+      ]"
     />
 
-    <div v-if="part">
-      <h1 class="text-2xl">
-        Zoeken: {{ part.name }}
-      </h1>
-      <p class="text-muted">
-        {{ project ? carLabel(project) : '' }}
-        <template v-if="part.partNumber">
-          · nr. {{ part.partNumber }}
-        </template>
-      </p>
-    </div>
-
-    <section
-      v-if="saved?.length"
-      class="space-y-3"
+    <header
+      v-if="part"
+      class="flex flex-wrap items-start justify-between gap-3"
     >
-      <h2 class="text-lg">
-        Opgeslagen resultaten
-      </h2>
-      <SavedResults
-        :saved="saved"
-        @remove="removeSaved"
-        @contact="addContact"
-        @rate="rateSource"
+      <div class="space-y-1">
+        <h1 class="text-2xl">
+          {{ part.name }}
+        </h1>
+        <p class="text-muted">
+          {{ project ? carLabel(project) : '' }}
+          <template v-if="part.partNumber">
+            · nr. {{ part.partNumber }}
+          </template>
+          · aantal {{ part.quantity }}
+        </p>
+      </div>
+      <UBadge
+        :label="STATUS_LABELS[part.status]"
+        :color="STATUS_COLORS[part.status]"
+        variant="subtle"
+        size="lg"
       />
-    </section>
+    </header>
 
-    <UPageCard
-      title="Nieuwe zoekopdracht"
-      description="Beschrijf het onderdeel zo goed als je kunt, ook als je het niet precies weet. Foto's helpen."
+    <UTabs
+      v-model="tab"
+      :items="tabs"
+      :content="true"
+      variant="link"
     >
-      <form
-        class="space-y-4"
-        @submit.prevent="startSearch"
-      >
-        <UFormField label="Beschrijving">
-          <UTextarea
-            v-model="form.description"
-            placeholder="Bijvoorbeeld: klein chromen dingetje boven de linker koplamp"
-            class="w-full"
+      <template #search>
+        <div class="space-y-8 pt-6">
+          <NewSearchForm
+            v-if="showForm"
+            :base="base"
+            @created="onCreated"
+            @cancel="creating = false"
           />
-        </UFormField>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <UFormField label="Onderdeelnummer">
-            <UInput
-              v-model="form.partNumber"
-              class="w-full"
+
+          <template v-if="searches?.length">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm text-muted">Zoekopdracht</span>
+                <UButton
+                  v-for="(s, i) in searches"
+                  :key="s.id"
+                  :label="searchLabel(s, i)"
+                  size="xs"
+                  :color="s.id === active?.id ? 'primary' : 'neutral'"
+                  :variant="s.id === active?.id ? 'solid' : 'subtle'"
+                  @click="activeId = s.id; creating = false"
+                />
+              </div>
+              <UButton
+                v-if="!showForm"
+                label="Nieuwe zoekopdracht"
+                icon="i-lucide-plus"
+                color="neutral"
+                variant="subtle"
+                @click="creating = true"
+              />
+            </div>
+
+            <SearchPanel
+              v-if="active && !showForm"
+              :key="active.id"
+              :base="base"
+              :search="active"
+              :saved-ids="savedIds"
+              @changed="refresh()"
+              @save="saveResult"
+              @adopt="adoptPartNumber"
             />
-          </UFormField>
-          <UFormField label="Extra informatie">
-            <UInput
-              v-model="form.info"
-              placeholder="Afmetingen, materiaal, positie…"
-              class="w-full"
-            />
-          </UFormField>
+          </template>
         </div>
-        <ImagePicker v-model="newImages" />
-        <UButton
-          type="submit"
-          label="Zoeken"
-          icon="i-lucide-search"
-          :loading="searching"
-        />
-      </form>
-    </UPageCard>
-
-    <UAlert
-      color="neutral"
-      variant="subtle"
-      icon="i-lucide-info"
-      description="De AI bepaalt welk onderdeel het is en welke zoektermen werken. Daarna kun je de bronnen doorzoeken. Zolang alleen de demobron actief is, zijn de resultaten verzonnen."
-    />
-
-    <section
-      v-for="search in searches"
-      :key="search.id"
-      class="space-y-4"
-    >
-      <p class="text-sm text-muted">
-        {{ new Date(search.createdAt).toLocaleString() }} · {{ search.createdByName }}
-      </p>
-
-      <template
-        v-for="(turn, i) in search.turns"
-        :key="i"
-      >
-        <div
-          v-if="turn.userText || turn.imageCount"
-          class="ms-8 rounded-md bg-elevated p-3 text-sm whitespace-pre-line"
-        >
-          {{ turn.userText }}
-          <span
-            v-if="turn.imageCount"
-            class="block text-muted"
-          >
-            {{ turn.imageCount }} foto{{ turn.imageCount === 1 ? '' : "'s" }} meegestuurd
-          </span>
-        </div>
-        <AnalysisCard :analysis="turn.analysis" />
       </template>
 
-      <div
-        v-if="search.turns.at(-1)!.analysis.possiblePartNumbers.length"
-        class="flex flex-wrap items-center gap-2 text-sm"
-      >
-        <span class="text-muted">Overnemen als onderdeelnummer:</span>
-        <UButton
-          v-for="n in search.turns.at(-1)!.analysis.possiblePartNumbers"
-          :key="n"
-          :label="n"
-          size="xs"
-          color="neutral"
-          variant="subtle"
-          :loading="adopting"
-          @click="adoptPartNumber(n)"
-        />
-      </div>
-
-      <div class="space-y-3">
-        <UButton
-          :label="search.sources ? 'Bronnen opnieuw doorzoeken' : 'Bronnen doorzoeken'"
-          icon="i-lucide-store"
-          :loading="findingSources === search.id"
-          @click="findSources(search)"
-        />
-        <SourceResults
-          v-if="search.sources"
-          :run="search.sources"
-          :saved-ids="savedIds"
-          @save="saveResult(search, $event)"
-        />
-      </div>
-
-      <form
-        class="space-y-2"
-        @submit.prevent="refine(search)"
-      >
-        <UTextarea
-          v-model="answers[search.id]"
-          placeholder="Antwoord op de vragen of geef meer informatie…"
-          class="w-full"
-        />
-        <ImagePicker
-          :model-value="answerImages[search.id] ?? []"
-          @update:model-value="answerImages[search.id] = $event"
-        />
-        <UButton
-          type="submit"
-          label="Verfijnen"
-          icon="i-lucide-sparkles"
-          color="neutral"
-          variant="subtle"
-          :loading="refining === search.id"
-        />
-      </form>
-      <USeparator />
-    </section>
-
-    <UEmpty
-      v-if="searches && !searches.length"
-      icon="i-lucide-search"
-      title="Nog geen zoekopdrachten voor dit onderdeel"
-    />
+      <template #saved>
+        <div class="pt-6">
+          <SavedResults
+            v-if="saved?.length"
+            :saved="saved"
+            @remove="removeSaved"
+            @contact="addContact"
+            @rate="rateSource"
+          />
+          <UEmpty
+            v-else
+            icon="i-lucide-bookmark"
+            title="Nog niets opgeslagen"
+            description="Sla een resultaat op bij het zoeken. Hier kun je daarna contact vastleggen en de bron beoordelen."
+            :actions="[{ label: 'Naar zoeken', onClick: () => (tab = 'search') }]"
+          />
+        </div>
+      </template>
+    </UTabs>
   </UContainer>
 </template>
