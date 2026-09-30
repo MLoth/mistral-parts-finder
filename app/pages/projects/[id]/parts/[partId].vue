@@ -97,7 +97,7 @@ async function adoptPartNumber(number: string) {
     <UBreadcrumb
       :items="[
         { label: 'Projecten', to: '/' },
-        { label: project?.name ?? '…', to: `/projects/${projectId}` },
+        { label: project ? projectTitle(project) : '…', to: `/projects/${projectId}` },
         { label: part?.name ?? '…' }
       ]"
     />

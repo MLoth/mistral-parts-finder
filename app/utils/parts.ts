@@ -16,9 +16,6 @@ export const STATUS_COLORS: Record<PartStatus, 'neutral' | 'warning' | 'info' | 
   received: 'success'
 }
 
-export const carLabel = (p: { make: string, model: string, year: number | null }) =>
-  [p.year, p.make, p.model].filter(Boolean).join(' ')
-
 export const ROLE_LABELS = { admin: 'Beheerder', staff: 'Medewerker' } as const
 export const ROLE_ITEMS = [
   { label: ROLE_LABELS.staff, value: 'staff' },

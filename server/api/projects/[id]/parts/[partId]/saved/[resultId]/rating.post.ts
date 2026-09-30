@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     id: randomUUID(),
     at: new Date().toISOString(),
     by: user.name ?? user.email ?? '',
-    context: `${project.name} / ${part.name}`,
+    context: `${projectTitle(project)} / ${part.name}`,
     ...body
   })
   return { ok: true }
