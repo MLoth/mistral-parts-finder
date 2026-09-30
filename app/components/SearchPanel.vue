@@ -52,7 +52,7 @@ async function findSources() {
 <template>
   <div class="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
     <!-- Right on wide screens: what you asked and what the AI thinks. Stays in view while the results scroll. First on phones. -->
-    <div class="space-y-4 lg:order-2 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto lg:pe-1">
+    <div class="space-y-4 lg:order-2 lg:sticky lg:top-20 lg:-m-1 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto lg:p-1">
       <UCard>
         <template #header>
           <StepHeading title="Jouw beschrijving" />
