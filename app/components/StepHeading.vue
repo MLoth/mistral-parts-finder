@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ n: number, title: string, hint?: string, done?: boolean }>()
+defineProps<{ title: string, hint?: string, done?: boolean }>()
 </script>
 
 <template>
@@ -13,7 +13,10 @@ defineProps<{ n: number, title: string, hint?: string, done?: boolean }>()
         name="i-lucide-check"
         class="size-4"
       />
-      <template v-else>{{ n }}</template>
+      <span
+        v-else
+        class="size-2 rounded-full bg-muted"
+      />
     </span>
     <div>
       <h2 class="text-lg leading-7">

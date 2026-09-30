@@ -93,7 +93,7 @@ async function adoptPartNumber(number: string) {
 </script>
 
 <template>
-  <UContainer class="py-8 max-w-4xl space-y-6">
+  <UContainer class="py-8 max-w-6xl space-y-6">
     <UBreadcrumb
       :items="[
         { label: 'Projecten', to: '/' },
