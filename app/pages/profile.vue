@@ -16,9 +16,9 @@ async function save() {
   saving.value = true
   try {
     await updateDisplayName(parsed.data)
-    toast.add({ title: 'Profile updated' })
+    toast.add({ title: 'Profiel bijgewerkt' })
   } catch {
-    toast.add({ title: 'Could not update profile', color: 'error' })
+    toast.add({ title: 'Profiel bijwerken mislukt', color: 'error' })
   } finally {
     saving.value = false
   }
@@ -32,7 +32,7 @@ const lastSignIn = computed(() =>
 <template>
   <UContainer class="py-8 max-w-2xl space-y-6">
     <h1 class="text-2xl">
-      Profile
+      Profiel
     </h1>
 
     <div class="flex items-center gap-4">
@@ -46,7 +46,7 @@ const lastSignIn = computed(() =>
           {{ displayName }}
         </p>
         <UBadge
-          :label="role"
+          :label="ROLE_LABELS[role]"
           :color="role === 'admin' ? 'primary' : 'neutral'"
           variant="subtle"
         />
@@ -59,31 +59,31 @@ const lastSignIn = computed(() =>
         @submit.prevent="save"
       >
         <UFormField
-          label="Display name"
-          help="Shown to your colleagues, for example as the creator of a project."
+          label="Weergavenaam"
+          help="Zichtbaar voor je collega's, bijvoorbeeld als maker van een project."
           :error="error"
         >
           <UInput
             v-model="name"
-            placeholder="Your name"
+            placeholder="Je naam"
             class="w-full"
           />
         </UFormField>
-        <UFormField label="Email">
+        <UFormField label="E-mail">
           <UInput
             :model-value="user?.email ?? ''"
             disabled
             class="w-full"
           />
         </UFormField>
-        <UFormField label="Last sign in">
+        <UFormField label="Laatst ingelogd">
           <p class="text-sm">
             {{ lastSignIn }}
           </p>
         </UFormField>
         <UButton
           type="submit"
-          label="Save"
+          label="Opslaan"
           :loading="saving"
         />
       </form>

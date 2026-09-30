@@ -24,9 +24,9 @@ const adding = ref(false)
 const confirmDelete = ref(false)
 
 const columns: TableColumn<Part>[] = [
-  { accessorKey: 'name', header: 'Part' },
-  { accessorKey: 'quantity', header: 'Qty' },
-  { accessorKey: 'partNumber', header: 'Part number' },
+  { accessorKey: 'name', header: 'Onderdeel' },
+  { accessorKey: 'quantity', header: 'Aantal' },
+  { accessorKey: 'partNumber', header: 'Onderdeelnummer' },
   { accessorKey: 'status', header: 'Status' },
   { id: 'actions', header: '' }
 ]
@@ -41,17 +41,17 @@ async function run(fn: () => Promise<unknown>, failure: string) {
 }
 
 const setStatus = (part: Part, status: PartStatus) =>
-  run(() => api(`/api/projects/${id}/parts/${part.id}`, { method: 'PATCH', body: { status } }), 'Could not update part')
+  run(() => api(`/api/projects/${id}/parts/${part.id}`, { method: 'PATCH', body: { status } }), 'Onderdeel bijwerken mislukt')
 
 const removePart = (part: Part) =>
-  run(() => api(`/api/projects/${id}/parts/${part.id}`, { method: 'DELETE' }), 'Could not remove part')
+  run(() => api(`/api/projects/${id}/parts/${part.id}`, { method: 'DELETE' }), 'Onderdeel verwijderen mislukt')
 
 async function deleteProject() {
   try {
     await api(`/api/projects/${id}`, { method: 'DELETE' })
     await navigateTo('/')
   } catch {
-    toast.add({ title: 'Could not delete project', color: 'error' })
+    toast.add({ title: 'Project verwijderen mislukt', color: 'error' })
   }
 }
 
@@ -65,7 +65,7 @@ function editPart(part: Part) {
 
 async function savePart() {
   const part = editingPart.value!
-  await run(() => api(`/api/projects/${id}/parts/${part.id}`, { method: 'PATCH', body: partForm }), 'Could not update part')
+  await run(() => api(`/api/projects/${id}/parts/${part.id}`, { method: 'PATCH', body: partForm }), 'Onderdeel bijwerken mislukt')
   editingPart.value = null
 }
 </script>
@@ -74,7 +74,7 @@ async function savePart() {
   <UContainer class="py-8 space-y-6">
     <UButton
       to="/"
-      label="All projects"
+      label="Alle projecten"
       icon="i-lucide-arrow-left"
       color="neutral"
       variant="link"
@@ -84,7 +84,7 @@ async function savePart() {
     <UAlert
       v-if="error"
       color="error"
-      title="Project not found"
+      title="Project niet gevonden"
     />
 
     <template v-else-if="project">
@@ -94,12 +94,12 @@ async function savePart() {
             {{ project.name }}
           </h1>
           <p class="text-muted">
-            {{ carLabel(project) || 'No car details' }} · created by {{ project.createdByName || project.createdByEmail }}
+            {{ carLabel(project) || 'Geen autogegevens' }} · aangemaakt door {{ project.createdByName || project.createdByEmail }}
           </p>
         </div>
         <div class="flex gap-2">
           <UButton
-            label="Edit"
+            label="Bewerken"
             icon="i-lucide-pencil"
             color="neutral"
             variant="subtle"
@@ -107,7 +107,7 @@ async function savePart() {
           />
           <UButton
             v-if="canDelete"
-            label="Delete"
+            label="Verwijderen"
             icon="i-lucide-trash-2"
             color="error"
             variant="subtle"
@@ -128,16 +128,16 @@ async function savePart() {
           :model-value="project.partsTotal ? (project.partsSourced / project.partsTotal) * 100 : 0"
         />
         <p class="text-sm text-muted">
-          {{ project.partsSourced }} of {{ project.partsTotal }} parts sourced
+          {{ project.partsSourced }} van {{ project.partsTotal }} onderdelen gevonden
         </p>
       </div>
 
       <div class="flex items-center justify-between">
         <h2 class="text-lg">
-          Parts
+          Onderdelen
         </h2>
         <UButton
-          label="Add parts"
+          label="Onderdelen toevoegen"
           icon="i-lucide-plus"
           @click="adding = true"
         />
@@ -146,9 +146,9 @@ async function savePart() {
       <UEmpty
         v-if="!parts.length"
         icon="i-lucide-cog"
-        title="No parts yet"
-        description="Add the parts this car needs."
-        :actions="[{ label: 'Add parts', icon: 'i-lucide-plus', onClick: () => (adding = true) }]"
+        title="Nog geen onderdelen"
+        description="Voeg de onderdelen toe die deze auto nodig heeft."
+        :actions="[{ label: 'Onderdelen toevoegen', icon: 'i-lucide-plus', onClick: () => (adding = true) }]"
       />
       <UTable
         v-else
@@ -170,14 +170,14 @@ async function savePart() {
               icon="i-lucide-pencil"
               color="neutral"
               variant="ghost"
-              aria-label="Edit part"
+              aria-label="Onderdeel bewerken"
               @click="editPart(row.original)"
             />
             <UButton
               icon="i-lucide-trash-2"
               color="error"
               variant="ghost"
-              aria-label="Remove part"
+              aria-label="Onderdeel verwijderen"
               @click="removePart(row.original)"
             />
           </div>
@@ -197,19 +197,19 @@ async function savePart() {
 
       <UModal
         v-model:open="confirmDelete"
-        title="Delete project?"
-        :description="`“${project.name}” and its ${project.partsTotal} parts will be permanently deleted.`"
+        title="Project verwijderen?"
+        :description="`“${project.name}” en de ${project.partsTotal} onderdelen worden definitief verwijderd.`"
       >
         <template #footer>
           <div class="flex justify-end gap-2 w-full">
             <UButton
-              label="Cancel"
+              label="Annuleren"
               color="neutral"
               variant="ghost"
               @click="confirmDelete = false"
             />
             <UButton
-              label="Delete"
+              label="Verwijderen"
               color="error"
               @click="deleteProject"
             />
@@ -219,7 +219,7 @@ async function savePart() {
 
       <UModal
         :open="!!editingPart"
-        title="Edit part"
+        title="Onderdeel bewerken"
         @update:open="editingPart = null"
       >
         <template #body>
@@ -228,7 +228,7 @@ async function savePart() {
             @submit.prevent="savePart"
           >
             <UFormField
-              label="Name"
+              label="Naam"
               required
             >
               <UInput
@@ -238,21 +238,21 @@ async function savePart() {
               />
             </UFormField>
             <div class="grid grid-cols-2 gap-3">
-              <UFormField label="Quantity">
+              <UFormField label="Aantal">
                 <UInputNumber
                   v-model="partForm.quantity"
                   :min="1"
                   class="w-full"
                 />
               </UFormField>
-              <UFormField label="Part number">
+              <UFormField label="Onderdeelnummer">
                 <UInput
                   v-model="partForm.partNumber"
                   class="w-full"
                 />
               </UFormField>
             </div>
-            <UFormField label="Notes">
+            <UFormField label="Notities">
               <UTextarea
                 v-model="partForm.notes"
                 class="w-full"
@@ -261,7 +261,7 @@ async function savePart() {
             <div class="flex justify-end">
               <UButton
                 type="submit"
-                label="Save"
+                label="Opslaan"
               />
             </div>
           </form>

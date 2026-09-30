@@ -32,7 +32,7 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
     open.value = false
     emit('saved', saved)
   } catch {
-    toast.add({ title: 'Could not save project', color: 'error' })
+    toast.add({ title: 'Project opslaan mislukt', color: 'error' })
   } finally {
     saving.value = false
   }
@@ -42,7 +42,7 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
 <template>
   <UModal
     v-model:open="open"
-    :title="project ? 'Edit project' : 'New project'"
+    :title="project ? 'Project bewerken' : 'Nieuw project'"
   >
     <template #body>
       <UForm
@@ -52,19 +52,19 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
         @submit="onSubmit"
       >
         <UFormField
-          label="Name"
+          label="Naam"
           name="name"
           required
         >
           <UInput
             v-model="state.name"
-            placeholder="E-Type restoration"
+            placeholder="E-Type restauratie"
             class="w-full"
           />
         </UFormField>
         <div class="grid grid-cols-3 gap-3">
           <UFormField
-            label="Make"
+            label="Merk"
             name="make"
           >
             <UInput
@@ -82,7 +82,7 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
             />
           </UFormField>
           <UFormField
-            label="Year"
+            label="Bouwjaar"
             name="year"
           >
             <UInputNumber
@@ -94,7 +94,7 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
           </UFormField>
         </div>
         <UFormField
-          label="Notes"
+          label="Notities"
           name="notes"
         >
           <UTextarea
@@ -104,14 +104,14 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
         </UFormField>
         <div class="flex justify-end gap-2">
           <UButton
-            label="Cancel"
+            label="Annuleren"
             color="neutral"
             variant="ghost"
             @click="open = false"
           />
           <UButton
             type="submit"
-            :label="project ? 'Save' : 'Create project'"
+            :label="project ? 'Opslaan' : 'Project aanmaken'"
             :loading="saving"
           />
         </div>

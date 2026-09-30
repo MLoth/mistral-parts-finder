@@ -9,9 +9,9 @@ async function resetPassword() {
   sending.value = true
   try {
     await sendPasswordReset()
-    toast.add({ title: 'Email sent', description: `Check ${user.value?.email} for a link to set a new password.` })
+    toast.add({ title: 'E-mail verzonden', description: `Controleer ${user.value?.email} voor een link om een nieuw wachtwoord in te stellen.` })
   } catch {
-    toast.add({ title: 'Could not send the email', color: 'error' })
+    toast.add({ title: 'E-mail verzenden mislukt', color: 'error' })
   } finally {
     sending.value = false
   }
@@ -21,33 +21,33 @@ async function resetPassword() {
 <template>
   <UContainer class="py-8 max-w-2xl space-y-6">
     <h1 class="text-2xl">
-      Settings
+      Instellingen
     </h1>
 
     <UPageCard
-      title="Appearance"
-      description="Choose light or dark mode, or follow your device."
+      title="Weergave"
+      description="Kies lichte of donkere modus, of volg je apparaat."
     >
       <UColorModeSelect class="w-48" />
     </UPageCard>
 
     <UPageCard
-      title="Projects"
-      description="Applies to the project list."
+      title="Projecten"
+      description="Geldt voor de projectenlijst."
     >
       <USwitch
         v-model="onlyMine"
-        label="Start with only my projects"
+        label="Begin met alleen mijn projecten"
       />
     </UPageCard>
 
     <UPageCard
-      title="Security"
-      description="Password and sign-in."
+      title="Beveiliging"
+      description="Wachtwoord en inloggen."
     >
       <div v-if="canChangePassword">
         <UButton
-          label="Send password reset email"
+          label="Wachtwoord-resetmail versturen"
           color="neutral"
           variant="subtle"
           :loading="sending"
@@ -58,7 +58,7 @@ async function resetPassword() {
         v-else
         class="text-sm text-muted"
       >
-        You sign in with Google, so your password is managed by your Google account.
+        Je logt in met Google, dus je wachtwoord wordt beheerd via je Google-account.
       </p>
     </UPageCard>
   </UContainer>

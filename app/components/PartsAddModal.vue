@@ -18,7 +18,7 @@ watch(open, (isOpen) => {
 async function save() {
   const filled = rows.value.filter(r => r.name.trim())
   if (!filled.length) {
-    toast.add({ title: 'Enter at least one part name', color: 'warning' })
+    toast.add({ title: 'Vul minstens één onderdeelnaam in', color: 'warning' })
     return
   }
   saving.value = true
@@ -27,7 +27,7 @@ async function save() {
     open.value = false
     emit('saved')
   } catch {
-    toast.add({ title: 'Could not add parts', color: 'error' })
+    toast.add({ title: 'Onderdelen toevoegen mislukt', color: 'error' })
   } finally {
     saving.value = false
   }
@@ -37,7 +37,7 @@ async function save() {
 <template>
   <UModal
     v-model:open="open"
-    title="Add parts"
+    title="Onderdelen toevoegen"
     :ui="{ content: 'max-w-3xl' }"
   >
     <template #body>
@@ -52,7 +52,7 @@ async function save() {
         >
           <UInput
             v-model="row.name"
-            placeholder="Part name"
+            placeholder="Onderdeelnaam"
             class="col-span-4"
             :autofocus="i === 0"
           />
@@ -63,25 +63,25 @@ async function save() {
           />
           <UInput
             v-model="row.partNumber"
-            placeholder="Part number"
+            placeholder="Onderdeelnummer"
             class="col-span-3"
           />
           <UInput
             v-model="row.notes"
-            placeholder="Notes"
+            placeholder="Notities"
             class="col-span-2"
           />
           <UButton
             icon="i-lucide-x"
             color="neutral"
             variant="ghost"
-            aria-label="Remove row"
+            aria-label="Rij verwijderen"
             :disabled="rows.length === 1"
             @click="rows.splice(i, 1)"
           />
         </div>
         <UButton
-          label="Add another"
+          label="Nog een toevoegen"
           icon="i-lucide-plus"
           color="neutral"
           variant="subtle"
@@ -89,14 +89,14 @@ async function save() {
         />
         <div class="flex justify-end gap-2 pt-2">
           <UButton
-            label="Cancel"
+            label="Annuleren"
             color="neutral"
             variant="ghost"
             @click="open = false"
           />
           <UButton
             type="submit"
-            label="Add parts"
+            label="Toevoegen"
             :loading="saving"
           />
         </div>
