@@ -52,3 +52,14 @@ export const partAnalysisSchema = z.object({
   questions: z.array(z.string()),
   searchQueries: z.array(z.string())
 })
+
+export const saveResultSchema = z.object({ searchId: z.string().min(1), resultId: z.string().min(1) })
+
+export const contactSchema = z.object({
+  note: z.string().trim().max(1000).default(''),
+  outcome: z.enum(['contacted', 'no-reply', 'interested', 'not-available', 'declined', 'bought'])
+})
+
+export const rankingSchema = z.object({
+  rankings: z.array(z.object({ index: z.number().int(), score: z.number(), reason: z.string() }))
+})

@@ -2,10 +2,10 @@ import { createHash } from 'node:crypto'
 import type { RawResult, SourceProvider, SourceQuery } from '../types'
 
 const SHOPS = [
-  { name: 'Demo Onderdelenshop', kind: 'webshop' as const, location: 'Nederland' },
-  { name: 'Demo Marktplaats', kind: 'marketplace' as const, location: 'België' },
-  { name: 'Demo Klassiekerforum', kind: 'forum' as const, location: 'Duitsland' },
-  { name: 'Demo Verkoper', kind: 'seller' as const, location: 'Verenigd Koninkrijk' }
+  { name: 'Demo Onderdelenshop', kind: 'webshop' as const, location: 'Nederland', countryCode: 'nl' },
+  { name: 'Demo Marktplaats', kind: 'marketplace' as const, location: 'België', countryCode: 'be' },
+  { name: 'Demo Klassiekerforum', kind: 'forum' as const, location: 'Duitsland', countryCode: 'de' },
+  { name: 'Demo Verkoper', kind: 'seller' as const, location: 'Verenigd Koninkrijk', countryCode: 'gb' }
 ]
 
 const seed = (text: string, salt: string) => parseInt(createHash('sha1').update(text + salt).digest('hex').slice(0, 8), 16)
@@ -34,6 +34,7 @@ export const demoSource: SourceProvider = {
           price: shop.kind === 'forum' ? null : { amount: 15 + (n % 435), currency: shop.kind === 'seller' ? 'GBP' : 'EUR' },
           condition: (['new', 'used', 'refurbished'] as const)[(n + i) % 3]!,
           location: shop.location,
+          countryCode: shop.countryCode,
           seller: shop.kind === 'seller' || shop.kind === 'marketplace' ? { name: `Demo verkoper ${n % 90}`, contact: `verkoper${n % 90}@demo.invalid` } : null,
           snippet: `Demo-resultaat voor "${term}". Niet echt.`,
           imageUrl: null

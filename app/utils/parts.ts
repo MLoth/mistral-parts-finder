@@ -24,3 +24,12 @@ export const ROLE_ITEMS = [
   { label: ROLE_LABELS.staff, value: 'staff' },
   { label: ROLE_LABELS.admin, value: 'admin' }
 ]
+
+export const OUTCOME_LABELS = {
+  'contacted': 'Contact opgenomen',
+  'no-reply': 'Geen reactie',
+  'interested': 'Interesse',
+  'not-available': 'Niet beschikbaar',
+  'declined': 'Afgewezen',
+  'bought': 'Gekocht'
+} as const

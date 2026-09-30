@@ -1,5 +1,6 @@
 import type { SourceResult, SourceRun, SourceStatus } from '#shared/types/sourcing'
 import type { SourceQuery } from './types'
+import { countryCodeFrom } from '#shared/utils/country'
 import { dedupe, resultId } from './normalize'
 import { enabledSources } from './settings'
 
@@ -25,7 +26,7 @@ export async function searchSources(query: Omit<SourceQuery, 'limit'>): Promise<
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Time-out')), SOURCE_TIMEOUT_MS))
       ])
       for (const r of raw) {
-        collected.push({ ...r, kind: r.kind ?? source.kind, id: resultId(r.url), sourceId: source.id, sourceName: source.name, alsoFoundOn: [] })
+        collected.push({ ...r, countryCode: r.countryCode ?? countryCodeFrom(r.location), kind: r.kind ?? source.kind, id: resultId(r.url), sourceId: source.id, sourceName: source.name, alsoFoundOn: [] })
       }
       statuses.push({ sourceId: source.id, sourceName: source.name, ok: true, count: raw.length, ms: Date.now() - started })
     } catch (error) {
