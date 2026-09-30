@@ -33,3 +33,11 @@ export const OUTCOME_LABELS = {
   'declined': 'Afgewezen',
   'bought': 'Gekocht'
 } as const
+
+export const REASON_LABELS = {
+  price: 'Prijs',
+  speed: 'Snelheid',
+  reliability: 'Betrouwbaarheid',
+  quality: 'Kwaliteit',
+  matched: 'Onderdeel klopte'
+} as const

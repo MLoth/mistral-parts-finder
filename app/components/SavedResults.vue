@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { CONTACT_OUTCOMES, type ContactOutcome, type SavedResult } from '#shared/types/saved'
+import { RATING_REASONS, type RatingReason, type Verdict } from '#shared/types/ratings'
 
 defineProps<{ saved: SavedResult[] }>()
 const emit = defineEmits<{
   remove: [id: string]
   contact: [id: string, entry: { note: string, outcome: ContactOutcome }]
+  rate: [id: string, rating: { verdict: Verdict, reasons: RatingReason[], note: string }]
 }>()
 
 const drafts = reactive<Record<string, { note: string, outcome: ContactOutcome }>>({})
@@ -12,6 +14,20 @@ const draft = (id: string) => (drafts[id] ??= { note: '', outcome: 'contacted' }
 
 const money = (p: { amount: number, currency: string }) =>
   new Intl.NumberFormat('nl-NL', { style: 'currency', currency: p.currency }).format(p.amount)
+
+const rating = reactive<Record<string, { open: boolean, verdict: Verdict, reasons: RatingReason[], note: string }>>({})
+const ratingDraft = (id: string) => (rating[id] ??= { open: false, verdict: 'good', reasons: [], note: '' })
+
+function toggleReason(id: string, reason: RatingReason) {
+  const d = ratingDraft(id)
+  d.reasons = d.reasons.includes(reason) ? d.reasons.filter(r => r !== reason) : [...d.reasons, reason]
+}
+
+function submitRating(id: string) {
+  const { verdict, reasons, note } = ratingDraft(id)
+  emit('rate', id, { verdict, reasons, note })
+  rating[id] = { open: false, verdict: 'good', reasons: [], note: '' }
+}
 
 function add(id: string) {
   emit('contact', id, { ...draft(id) })
@@ -55,6 +71,13 @@ function add(id: string) {
         />
         <span>{{ s.result.sourceName }}</span>
         <span v-if="s.result.seller">· {{ s.result.seller.name }} · {{ s.result.seller.contact }}</span>
+        <SourceScoreBadge :rating="s.sourceRating" />
+        <UBadge
+          v-if="s.sourceRating?.blacklisted"
+          label="Geblokkeerd"
+          color="error"
+          variant="subtle"
+        />
         <span>· opgeslagen door {{ s.savedBy }}</span>
       </div>
 
@@ -85,6 +108,72 @@ function add(id: string) {
             <span class="text-muted">· {{ c.by }}, {{ new Date(c.at).toLocaleString() }}</span>
           </li>
         </ul>
+      </div>
+
+      <div class="space-y-2">
+        <UButton
+          v-if="!ratingDraft(s.id).open"
+          label="Beoordeel deze bron"
+          icon="i-lucide-star"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          @click="ratingDraft(s.id).open = true"
+        />
+        <form
+          v-else
+          class="space-y-2 rounded-md bg-elevated p-3"
+          @submit.prevent="submitRating(s.id)"
+        >
+          <div class="flex gap-2">
+            <UButton
+              label="Goed"
+              icon="i-lucide-thumbs-up"
+              size="sm"
+              :color="ratingDraft(s.id).verdict === 'good' ? 'success' : 'neutral'"
+              :variant="ratingDraft(s.id).verdict === 'good' ? 'solid' : 'subtle'"
+              @click="ratingDraft(s.id).verdict = 'good'"
+            />
+            <UButton
+              label="Slecht"
+              icon="i-lucide-thumbs-down"
+              size="sm"
+              :color="ratingDraft(s.id).verdict === 'bad' ? 'error' : 'neutral'"
+              :variant="ratingDraft(s.id).verdict === 'bad' ? 'solid' : 'subtle'"
+              @click="ratingDraft(s.id).verdict = 'bad'"
+            />
+          </div>
+          <div class="flex flex-wrap gap-1">
+            <UButton
+              v-for="reason in RATING_REASONS"
+              :key="reason"
+              :label="REASON_LABELS[reason]"
+              size="xs"
+              :color="ratingDraft(s.id).reasons.includes(reason) ? 'primary' : 'neutral'"
+              :variant="ratingDraft(s.id).reasons.includes(reason) ? 'solid' : 'outline'"
+              @click="toggleReason(s.id, reason)"
+            />
+          </div>
+          <UInput
+            v-model="ratingDraft(s.id).note"
+            placeholder="Toelichting (optioneel)"
+            class="w-full"
+          />
+          <div class="flex gap-2">
+            <UButton
+              type="submit"
+              label="Beoordeling opslaan"
+              size="sm"
+            />
+            <UButton
+              label="Annuleren"
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              @click="ratingDraft(s.id).open = false"
+            />
+          </div>
+        </form>
       </div>
 
       <form
