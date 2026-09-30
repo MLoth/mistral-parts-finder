@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { PART_STATUSES } from '../types/project'
 
+export const displayNameSchema = z.string().trim().min(2, 'At least 2 characters').max(40, 'At most 40 characters')
+
 export const projectSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(120),
   make: z.string().trim().max(60).default(''),

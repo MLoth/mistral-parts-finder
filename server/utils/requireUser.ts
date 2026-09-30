@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 
-export type SessionUser = { uid: string, email?: string, role: 'admin' | 'staff' }
+export type SessionUser = { uid: string, email?: string, name?: string, role: 'admin' | 'staff' }
 
 /** Verifies the Firebase ID token in the Authorization header. Use in every protected route. */
 export async function requireUser(event: H3Event, opts: { admin?: boolean } = {}): Promise<SessionUser> {
@@ -13,6 +13,7 @@ export async function requireUser(event: H3Event, opts: { admin?: boolean } = {}
     const user: SessionUser = {
       uid: decoded.uid,
       email: decoded.email,
+      name: decoded.name,
       role: decoded.role === 'admin' ? 'admin' : 'staff'
     }
     if (opts.admin && user.role !== 'admin') {

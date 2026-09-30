@@ -13,6 +13,7 @@ export type Project = {
   notes: string
   createdBy: string
   createdByEmail: string
+  createdByName?: string
   createdAt: string
   updatedAt: string
   partsTotal: number

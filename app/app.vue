@@ -21,7 +21,16 @@ useSeoMeta({
   ogDescription: description
 })
 
-const { user, isAdmin, signOut } = useAuth()
+const { user, isAdmin, displayName, signOut } = useAuth()
+
+const menuItems = computed(() => [
+  [
+    { label: 'Profile', icon: 'i-lucide-user', to: '/profile' },
+    { label: 'Settings', icon: 'i-lucide-settings', to: '/settings' }
+  ],
+  ...(isAdmin.value ? [[{ label: 'Users', icon: 'i-lucide-users', to: '/admin/users' }]] : []),
+  [{ label: 'Sign out', icon: 'i-lucide-log-out', onSelect: onSignOut }]
+])
 
 async function onSignOut() {
   await signOut()
@@ -38,20 +47,23 @@ async function onSignOut() {
 
       <template #right>
         <UColorModeButton />
-        <UButton
-          v-if="isAdmin"
-          to="/admin/users"
-          label="Users"
-          color="neutral"
-          variant="ghost"
-        />
-        <UButton
+        <UDropdownMenu
           v-if="user"
-          label="Sign out"
-          color="neutral"
-          variant="ghost"
-          @click="onSignOut"
-        />
+          :items="menuItems"
+        >
+          <UButton
+            color="neutral"
+            variant="ghost"
+            trailing-icon="i-lucide-chevron-down"
+          >
+            <UAvatar
+              :text="displayName.slice(0, 2).toUpperCase()"
+              :src="user.photoURL ?? undefined"
+              size="xs"
+            />
+            <span class="hidden sm:inline">{{ displayName }}</span>
+          </UButton>
+        </UDropdownMenu>
       </template>
     </UHeader>
 

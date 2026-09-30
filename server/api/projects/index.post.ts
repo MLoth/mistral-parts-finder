@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
     ...body,
     createdBy: user.uid,
     createdByEmail: user.email ?? '',
+    createdByName: user.name ?? '',
     createdAt: now,
     updatedAt: now
   })
