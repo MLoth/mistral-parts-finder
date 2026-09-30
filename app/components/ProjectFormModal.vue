@@ -55,6 +55,7 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
       ? await api<Project>(`/api/projects/${props.project.id}`, { method: 'PATCH', body: event.data })
       : await api<Project>('/api/projects', { method: 'POST', body: event.data })
     open.value = false
+    refreshNuxtData('catalog')
     emit('saved', saved)
   } catch {
     toast.add({ title: 'Project opslaan mislukt', color: 'error' })

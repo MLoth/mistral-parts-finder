@@ -35,7 +35,8 @@ const menuItems = computed(() => [
         { label: 'Gebruikers', icon: 'i-lucide-users', to: '/admin/users' },
         { label: 'AI-providers', icon: 'i-lucide-sparkles', to: '/admin/ai' },
         { label: 'Bronnen', icon: 'i-lucide-store', to: '/admin/sources' },
-        { label: 'Bronscores', icon: 'i-lucide-star', to: '/admin/source-scores' }
+        { label: 'Bronscores', icon: 'i-lucide-star', to: '/admin/source-scores' },
+        { label: 'Merken en types', icon: 'i-lucide-car', to: '/admin/catalog' }
       ]]
     : []),
   [{ label: 'Uitloggen', icon: 'i-lucide-log-out', onSelect: onSignOut }]
