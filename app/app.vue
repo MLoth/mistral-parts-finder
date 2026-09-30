@@ -30,7 +30,12 @@ const menuItems = computed(() => [
     { label: 'Profiel', icon: 'i-lucide-user', to: '/profile' },
     { label: 'Instellingen', icon: 'i-lucide-settings', to: '/settings' }
   ],
-  ...(isAdmin.value ? [[{ label: 'Gebruikers', icon: 'i-lucide-users', to: '/admin/users' }]] : []),
+  ...(isAdmin.value
+    ? [[
+        { label: 'Gebruikers', icon: 'i-lucide-users', to: '/admin/users' },
+        { label: 'AI-providers', icon: 'i-lucide-sparkles', to: '/admin/ai' }
+      ]]
+    : []),
   [{ label: 'Uitloggen', icon: 'i-lucide-log-out', onSelect: onSignOut }]
 ])
 
