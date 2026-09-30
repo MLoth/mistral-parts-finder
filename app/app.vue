@@ -33,7 +33,8 @@ const menuItems = computed(() => [
   ...(isAdmin.value
     ? [[
         { label: 'Gebruikers', icon: 'i-lucide-users', to: '/admin/users' },
-        { label: 'AI-providers', icon: 'i-lucide-sparkles', to: '/admin/ai' }
+        { label: 'AI-providers', icon: 'i-lucide-sparkles', to: '/admin/ai' },
+        { label: 'Bronnen', icon: 'i-lucide-store', to: '/admin/sources' }
       ]]
     : []),
   [{ label: 'Uitloggen', icon: 'i-lucide-log-out', onSelect: onSignOut }]

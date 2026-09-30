@@ -73,6 +73,19 @@ async function refine(search: PartSearch) {
   }
 }
 
+const findingSources = ref<string | null>(null)
+async function findSources(search: PartSearch) {
+  findingSources.value = search.id
+  try {
+    await api(`${base}/${search.id}/sources`, { method: 'POST' })
+    await refresh()
+  } catch (error) {
+    toast.add({ title: 'Bronnen doorzoeken mislukt', description: errorMessage(error), color: 'error' })
+  } finally {
+    findingSources.value = null
+  }
+}
+
 const adopting = ref(false)
 async function adoptPartNumber(number: string) {
   adopting.value = true
@@ -153,7 +166,7 @@ async function adoptPartNumber(number: string) {
       color="neutral"
       variant="subtle"
       icon="i-lucide-info"
-      description="De AI bepaalt hier welk onderdeel het is en welke zoektermen werken. Zoeken in webshops en bij verkopers is nog niet gekoppeld."
+      description="De AI bepaalt welk onderdeel het is en welke zoektermen werken. Daarna kun je de bronnen doorzoeken. Zolang alleen de demobron actief is, zijn de resultaten verzonnen."
     />
 
     <section
@@ -198,6 +211,19 @@ async function adoptPartNumber(number: string) {
           variant="subtle"
           :loading="adopting"
           @click="adoptPartNumber(n)"
+        />
+      </div>
+
+      <div class="space-y-3">
+        <UButton
+          :label="search.sources ? 'Bronnen opnieuw doorzoeken' : 'Bronnen doorzoeken'"
+          icon="i-lucide-store"
+          :loading="findingSources === search.id"
+          @click="findSources(search)"
+        />
+        <SourceResults
+          v-if="search.sources"
+          :run="search.sources"
         />
       </div>
 
