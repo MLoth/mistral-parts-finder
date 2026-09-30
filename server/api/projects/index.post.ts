@@ -1,6 +1,7 @@
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event)
-  const body = await readValidatedBody(event, projectSchema.parse)
+  const input = await readValidatedBody(event, projectSchema.parse)
+  const body = { ...input, ...(await canonicalCar(input.make, input.model)) }
   const now = new Date().toISOString()
 
   const ref = await projectsCol().add({

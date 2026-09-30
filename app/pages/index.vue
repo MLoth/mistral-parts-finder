@@ -58,8 +58,8 @@ async function onCreated(project: Project) {
         v-for="project in projects"
         :key="project.id"
         :to="`/projects/${project.id}`"
-        :title="project.name"
-        :description="carLabel(project) || 'Geen autogegevens'"
+        :title="projectTitle(project)"
+        :description="project.name ? carLabel(project) : ''"
       >
         <div class="space-y-2">
           <UProgress

@@ -4,9 +4,9 @@ import { PART_STATUSES } from '../types/project'
 export const displayNameSchema = z.string().trim().min(2, 'Minstens 2 tekens').max(40, 'Maximaal 40 tekens')
 
 export const projectSchema = z.object({
-  name: z.string().trim().min(1, 'Naam is verplicht').max(120),
-  make: z.string().trim().max(60).default(''),
-  model: z.string().trim().max(60).default(''),
+  name: z.string().trim().max(120).default(''),
+  make: z.string().trim().min(1, 'Merk is verplicht').max(60),
+  model: z.string().trim().min(1, 'Type is verplicht').max(60),
   year: z.number().int().min(1885).max(new Date().getFullYear() + 1).nullable().default(null),
   notes: z.string().trim().max(2000).default('')
 })

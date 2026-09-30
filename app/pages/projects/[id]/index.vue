@@ -91,10 +91,13 @@ async function savePart() {
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 class="text-2xl">
-            {{ project.name }}
+            {{ projectTitle(project) }}
           </h1>
           <p class="text-muted">
-            {{ carLabel(project) || 'Geen autogegevens' }} · aangemaakt door {{ project.createdByName || project.createdByEmail }}
+            <template v-if="project.name">
+              {{ carLabel(project) }} ·
+            </template>
+            aangemaakt door {{ project.createdByName || project.createdByEmail }}
           </p>
         </div>
         <div class="flex gap-2">
@@ -206,7 +209,7 @@ async function savePart() {
       <UModal
         v-model:open="confirmDelete"
         title="Project verwijderen?"
-        :description="`“${project.name}” en de ${project.partsTotal} onderdelen worden definitief verwijderd.`"
+        :description="`“${projectTitle(project)}” en de ${project.partsTotal} onderdelen worden definitief verwijderd.`"
       >
         <template #footer>
           <div class="flex justify-end gap-2 w-full">

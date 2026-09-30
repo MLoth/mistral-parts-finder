@@ -10,10 +10,24 @@ const api = useApi()
 const toast = useToast()
 const saving = ref(false)
 
-const state = reactive<Partial<ProjectInput>>({})
+const { data: catalog } = await useCatalog()
+// Brands and types typed in this form that are not in the catalogue yet; the server adds them when saving
+const newBrands = ref<string[]>([])
+const newModels = ref<string[]>([])
+const norm = (v: string | undefined) => (v ?? '').trim().toLowerCase()
+
+const brandItems = computed(() => [...(catalog.value ?? []).map(b => b.name), ...newBrands.value])
+const modelItems = computed(() => {
+  const brand = catalog.value?.find(b => norm(b.name) === norm(state.make))
+  return [...(brand?.models ?? []), ...newModels.value]
+})
+
+const state = reactive<Partial<ProjectInput>>({ name: '', make: '', model: '', year: null, notes: '' })
 
 watch(open, (isOpen) => {
   if (!isOpen) return
+  newBrands.value = []
+  newModels.value = []
   Object.assign(state, {
     name: props.project?.name ?? '',
     make: props.project?.make ?? '',
@@ -22,6 +36,11 @@ watch(open, (isOpen) => {
     notes: props.project?.notes ?? ''
   })
 })
+
+function onBrandChange(brand: string) {
+  // A type belongs to a brand, so clear it when the brand changes
+  if (norm(brand) !== norm(state.make)) state.model = ''
+}
 
 async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
   saving.value = true
@@ -51,48 +70,63 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
         class="space-y-4"
         @submit="onSubmit"
       >
-        <UFormField
-          label="Naam"
-          name="name"
-          required
-        >
-          <UInput
-            v-model="state.name"
-            placeholder="E-Type restauratie"
-            class="w-full"
-          />
-        </UFormField>
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid gap-3 sm:grid-cols-2">
           <UFormField
             label="Merk"
             name="make"
+            required
           >
-            <UInput
+            <UInputMenu
               v-model="state.make"
+              :items="brandItems"
+              create-item
+              open-on-click
+              open-on-focus
+              placeholder="Typ om te zoeken of toe te voegen"
               class="w-full"
+              @update:model-value="onBrandChange"
+              @create="(item: string) => { newBrands.push(item); onBrandChange(item); state.make = item }"
             />
           </UFormField>
           <UFormField
-            label="Model"
+            label="Type"
             name="model"
+            required
           >
-            <UInput
+            <UInputMenu
               v-model="state.model"
+              :items="modelItems"
+              create-item
+              open-on-click
+              open-on-focus
+              :disabled="!state.make"
+              :placeholder="state.make ? 'Typ om te zoeken of toe te voegen' : 'Kies eerst een merk'"
               class="w-full"
-            />
-          </UFormField>
-          <UFormField
-            label="Bouwjaar"
-            name="year"
-          >
-            <UInputNumber
-              v-model="state.year"
-              :increment="false"
-              :decrement="false"
-              class="w-full"
+              @create="(item: string) => { newModels.push(item); state.model = item }"
             />
           </UFormField>
         </div>
+        <UFormField
+          label="Bouwjaar"
+          name="year"
+        >
+          <UInputNumber
+            v-model="state.year"
+            :increment="false"
+            :decrement="false"
+            class="w-full sm:w-1/2"
+          />
+        </UFormField>
+        <UFormField
+          label="Naam (optioneel)"
+          name="name"
+          help="Bijvoorbeeld de naam van de klant of de auto. Anders tonen we merk en type."
+        >
+          <UInput
+            v-model="state.name"
+            class="w-full"
+          />
+        </UFormField>
         <UFormField
           label="Notities"
           name="notes"
