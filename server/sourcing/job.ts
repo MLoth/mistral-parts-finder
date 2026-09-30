@@ -46,7 +46,8 @@ export async function startSourcesJob(opts: { searchRef: DocumentReference, proj
     const found = await searchSources({
       queries: opts.analysis.searchQueries,
       partNumbers: opts.analysis.possiblePartNumbers,
-      car: { make: opts.project.make, model: opts.project.model, year: opts.project.year }
+      car: { make: opts.project.make, model: opts.project.model, year: opts.project.year },
+      userUid: opts.userUid
     }, {
       onPlan: async (sources) => {
         job.sources = sources.map(s => ({ ...s, state: 'pending' }))

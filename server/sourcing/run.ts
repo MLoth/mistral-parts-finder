@@ -16,9 +16,9 @@ export type SearchHooks = {
   onSource?: (status: SourceStatus & { attempts: number }, results: SourceResult[]) => void | Promise<void>
 }
 
-const withTimeout = <T>(promise: Promise<T>) => Promise.race([
+const withTimeout = <T>(promise: Promise<T>, ms: number) => Promise.race([
   promise,
-  new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Time-out: de bron reageerde niet op tijd')), SOURCE_TIMEOUT_MS))
+  new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Time-out: de bron reageerde niet op tijd')), ms))
 ])
 
 /** A source that breaks its own rules is not worth retrying (for example robots.txt). */
@@ -26,12 +26,13 @@ const isRetryable = (error: unknown) => !(error instanceof Error && /robots\.txt
 
 async function searchOne(source: SourceProvider, query: Omit<SourceQuery, 'limit'>) {
   let attempts = 0
+  const maxAttempts = source.maxAttempts ?? MAX_ATTEMPTS
   for (;;) {
     attempts++
     try {
-      return { raw: await withTimeout(source.search({ ...query, limit: MAX_RESULTS })), attempts }
+      return { raw: await withTimeout(source.search({ ...query, limit: MAX_RESULTS }), source.timeoutMs ?? SOURCE_TIMEOUT_MS), attempts }
     } catch (error) {
-      if (attempts >= MAX_ATTEMPTS || !isRetryable(error)) throw Object.assign(error instanceof Error ? error : new Error('Fout'), { attempts })
+      if (attempts >= maxAttempts || !isRetryable(error)) throw Object.assign(error instanceof Error ? error : new Error('Fout'), { attempts })
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS))
     }
   }
