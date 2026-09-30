@@ -94,7 +94,7 @@ async function savePart() {
             {{ project.name }}
           </h1>
           <p class="text-muted">
-            {{ carLabel(project) || 'No car details' }} · created by {{ project.createdByEmail }}
+            {{ carLabel(project) || 'No car details' }} · created by {{ project.createdByName || project.createdByEmail }}
           </p>
         </div>
         <div class="flex gap-2">

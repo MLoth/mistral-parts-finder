@@ -2,7 +2,7 @@
 import type { Project } from '#shared/types/project'
 
 const api = useApi()
-const mine = ref(false)
+const mine = ref(useCookie<boolean>('pref-only-mine', { default: () => false }).value)
 const creating = ref(false)
 
 const { data: projects, status } = await useAsyncData(

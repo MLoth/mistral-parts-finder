@@ -6,6 +6,7 @@ definePageMeta({ middleware: 'admin' })
 type AdminUser = {
   uid: string
   email: string
+  name: string
   role: 'admin' | 'staff'
   disabled: boolean
   lastSignIn: string | null
@@ -18,6 +19,7 @@ const { user: me } = useAuth()
 const { data: users, refresh, status } = await useAsyncData('admin-users', () => api<AdminUser[]>('/api/admin/users'), { server: false })
 
 const columns: TableColumn<AdminUser>[] = [
+  { accessorKey: 'name', header: 'Name' },
   { accessorKey: 'email', header: 'Email' },
   { accessorKey: 'role', header: 'Role' },
   { accessorKey: 'lastSignIn', header: 'Last sign in' },
@@ -86,6 +88,9 @@ async function copyLink() {
       :columns="columns"
       :loading="status === 'pending'"
     >
+      <template #name-cell="{ row }">
+        {{ row.original.name || '—' }}
+      </template>
       <template #role-cell="{ row }">
         <USelect
           :model-value="row.original.role"
