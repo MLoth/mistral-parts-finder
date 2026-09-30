@@ -19,7 +19,7 @@ export function toProject(doc: DocumentSnapshot, parts: Part[] = []): Project {
 
 export async function getProjectOr404(id: string) {
   const doc = await projectsCol().doc(id).get()
-  if (!doc.exists) throw createError({ statusCode: 404, statusMessage: 'Project not found' })
+  if (!doc.exists) throw createError({ statusCode: 404, statusMessage: 'Project niet gevonden' })
   return doc
 }
 

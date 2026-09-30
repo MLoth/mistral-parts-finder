@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, schema.parse)
 
   if (uid === me.uid && (body.role === 'staff' || body.disabled)) {
-    throw createError({ statusCode: 400, statusMessage: 'You cannot demote or disable yourself' })
+    throw createError({ statusCode: 400, statusMessage: 'Je kunt jezelf niet degraderen of uitschakelen' })
   }
 
   const auth = useFirebaseAdmin()

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { nl } from '@nuxt/ui/locale'
+
 const title = 'Mistral Parts Finder'
-const description = 'Find the right parts for your classic car, by Mistral Classics.'
+const description = 'Vind de juiste onderdelen voor je klassieker, door Mistral Classics.'
 
 useHead({
   meta: [
@@ -10,7 +12,7 @@ useHead({
     { rel: 'icon', href: '/favicon.ico' }
   ],
   htmlAttrs: {
-    lang: 'en'
+    lang: 'nl'
   }
 })
 
@@ -25,11 +27,11 @@ const { user, isAdmin, displayName, signOut } = useAuth()
 
 const menuItems = computed(() => [
   [
-    { label: 'Profile', icon: 'i-lucide-user', to: '/profile' },
-    { label: 'Settings', icon: 'i-lucide-settings', to: '/settings' }
+    { label: 'Profiel', icon: 'i-lucide-user', to: '/profile' },
+    { label: 'Instellingen', icon: 'i-lucide-settings', to: '/settings' }
   ],
-  ...(isAdmin.value ? [[{ label: 'Users', icon: 'i-lucide-users', to: '/admin/users' }]] : []),
-  [{ label: 'Sign out', icon: 'i-lucide-log-out', onSelect: onSignOut }]
+  ...(isAdmin.value ? [[{ label: 'Gebruikers', icon: 'i-lucide-users', to: '/admin/users' }]] : []),
+  [{ label: 'Uitloggen', icon: 'i-lucide-log-out', onSelect: onSignOut }]
 ])
 
 async function onSignOut() {
@@ -39,7 +41,7 @@ async function onSignOut() {
 </script>
 
 <template>
-  <UApp>
+  <UApp :locale="nl">
     <UHeader title="Mistral Parts Finder">
       <template #title>
         <AppLogo class="text-base" />

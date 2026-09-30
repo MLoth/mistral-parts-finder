@@ -5,8 +5,8 @@ const { signInWithEmail, signInWithGoogle } = useAuth()
 const toast = useToast()
 
 const fields: AuthFormField[] = [
-  { name: 'email', type: 'email', label: 'Email', required: true },
-  { name: 'password', type: 'password', label: 'Password', required: true }
+  { name: 'email', type: 'email', label: 'E-mail', required: true },
+  { name: 'password', type: 'password', label: 'Wachtwoord', required: true }
 ]
 
 const providers = [{
@@ -20,7 +20,7 @@ async function run(fn: () => Promise<unknown>) {
     await fn()
     await navigateTo('/')
   } catch {
-    toast.add({ title: 'Sign in failed', description: 'Check your details and try again.', color: 'error' })
+    toast.add({ title: 'Inloggen mislukt', description: 'Controleer je gegevens en probeer het opnieuw.', color: 'error' })
   }
 }
 
@@ -35,9 +35,10 @@ function onSubmit(event: FormSubmitEvent<{ email: string, password: string }>) {
       <UAuthForm
         :fields="fields"
         :providers="providers"
-        title="Sign in"
-        description="Mistral Classics staff only."
-        :submit="{ label: 'Sign in' }"
+        separator="of"
+        title="Inloggen"
+        description="Alleen voor medewerkers van Mistral Classics."
+        :submit="{ label: 'Inloggen' }"
         @submit="onSubmit"
       >
         <template #icon>

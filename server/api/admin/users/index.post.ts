@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     return { user: toAdminUser(await auth.getUser(user.uid)), setPasswordLink }
   } catch (error) {
     if ((error as { code?: string }).code === 'auth/email-already-exists') {
-      throw createError({ statusCode: 409, statusMessage: 'A user with this email already exists' })
+      throw createError({ statusCode: 409, statusMessage: 'Er bestaat al een gebruiker met dit e-mailadres' })
     }
     throw error
   }
