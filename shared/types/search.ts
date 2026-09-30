@@ -1,3 +1,5 @@
+import type { SourceRun } from './sourcing'
+
 export type Confidence = 'low' | 'medium' | 'high'
 
 /** What the AI concluded about the part. */
@@ -29,4 +31,6 @@ export type PartSearch = {
   createdBy: string
   createdByName: string
   turns: SearchTurn[]
+  /** Latest lookup of the analysis in the sources */
+  sources?: SourceRun
 }
