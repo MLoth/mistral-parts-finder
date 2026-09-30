@@ -1,27 +1,39 @@
-import { FieldValue } from 'firebase-admin/firestore'
 import { CAR_CATALOG } from '#shared/data/carCatalog'
 
 export type CatalogBrand = { name: string, models: string[] }
-type Custom = { brand: string, model: string }
 
 const ref = () => useFirestore().collection('settings').doc('catalog')
 const norm = (s: string) => s.trim().toLowerCase()
+const byName = (a: CatalogBrand, b: CatalogBrand) => a.name.localeCompare(b.name)
+const byModel = (a: string, b: string) => a.localeCompare(b, 'nl', { numeric: true })
 
-async function loadCustom(): Promise<Custom[]> {
-  return ((await ref().get()).data()?.custom as Custom[] | undefined) ?? []
+function tidy(brands: CatalogBrand[]): CatalogBrand[] {
+  return brands.map(b => ({ name: b.name, models: [...new Set(b.models)].sort(byModel) })).sort(byName)
 }
 
-/** Built-in brands and models merged with those colleagues added. */
+/**
+ * The catalogue lives in Firestore so admins can edit it. The built-in list
+ * (shared/data/carCatalog.ts) is only the starting point: it is copied over on first use,
+ * together with anything colleagues added before the admin page existed.
+ */
 export async function loadCatalog(): Promise<CatalogBrand[]> {
+  const doc = await ref().get()
+  const stored = doc.data()?.brands as CatalogBrand[] | undefined
+  if (stored) return tidy(stored)
+
   const brands = new Map<string, Set<string>>(Object.entries(CAR_CATALOG).map(([b, models]) => [b, new Set(models)]))
-  for (const { brand, model } of await loadCustom()) {
-    const canonical = [...brands.keys()].find(b => norm(b) === norm(brand)) ?? brand
-    if (!brands.has(canonical)) brands.set(canonical, new Set())
-    if (model) brands.get(canonical)!.add(model)
+  for (const { brand, model } of (doc.data()?.custom ?? []) as { brand: string, model: string }[]) {
+    const name = [...brands.keys()].find(b => norm(b) === norm(brand)) ?? brand
+    if (!brands.has(name)) brands.set(name, new Set())
+    if (model) brands.get(name)!.add(model)
   }
-  return [...brands.entries()]
-    .map(([name, models]) => ({ name, models: [...models].sort((a, b) => a.localeCompare(b, 'nl', { numeric: true })) }))
-    .sort((a, b) => a.name.localeCompare(b.name))
+  const seeded = tidy([...brands.entries()].map(([name, models]) => ({ name, models: [...models] })))
+  await ref().set({ brands: seeded }, { merge: true })
+  return seeded
+}
+
+export async function saveCatalog(brands: CatalogBrand[]) {
+  await ref().set({ brands: tidy(brands) }, { merge: true })
 }
 
 /**
@@ -35,7 +47,10 @@ export async function canonicalCar(make: string, model: string) {
   const result = { make: brand?.name ?? make.trim(), model: knownModel ?? model.trim() }
 
   if (!brand || !knownModel) {
-    await ref().set({ custom: FieldValue.arrayUnion({ brand: result.make, model: result.model }) }, { merge: true })
+    const next = brand
+      ? catalog.map(b => (b === brand ? { ...b, models: [...b.models, result.model] } : b))
+      : [...catalog, { name: result.make, models: [result.model] }]
+    await saveCatalog(next)
   }
   return result
 }
