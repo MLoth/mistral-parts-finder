@@ -24,8 +24,12 @@ const modelItems = computed(() => {
 
 const state = reactive<Partial<ProjectInput>>({ name: '', make: '', model: '', year: null, notes: '' })
 
-watch(open, (isOpen) => {
+// True while the form is being filled from a project, so that fill does not count as the user changing the brand
+let filling = false
+
+watch(open, async (isOpen) => {
   if (!isOpen) return
+  filling = true
   newBrands.value = []
   newModels.value = []
   Object.assign(state, {
@@ -35,12 +39,14 @@ watch(open, (isOpen) => {
     year: props.project?.year ?? null,
     notes: props.project?.notes ?? ''
   })
+  await nextTick()
+  filling = false
 })
 
-function onBrandChange(brand: string) {
-  // A type belongs to a brand, so clear it when the brand changes
-  if (norm(brand) !== norm(state.make)) state.model = ''
-}
+// A type belongs to a brand, so clear it when the user picks a different brand
+watch(() => state.make, (now, before) => {
+  if (!filling && norm(now) !== norm(before)) state.model = ''
+})
 
 async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
   saving.value = true
@@ -84,8 +90,7 @@ async function onSubmit(event: FormSubmitEvent<ProjectInput>) {
               open-on-focus
               placeholder="Typ om te zoeken of toe te voegen"
               class="w-full"
-              @update:model-value="onBrandChange"
-              @create="(item: string) => { newBrands.push(item); onBrandChange(item); state.make = item }"
+              @create="(item: string) => { newBrands.push(item); state.make = item }"
             />
           </UFormField>
           <UFormField
