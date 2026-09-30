@@ -22,6 +22,14 @@ const scoreColor = (n = 0) => (n >= 70 ? 'success' : n >= 40 ? 'warning' : 'neut
     />
 
     <UAlert
+      v-if="run.results.some(r => r.sourceId === 'demo')"
+      color="warning"
+      variant="subtle"
+      icon="i-lucide-flask-conical"
+      description="Dit zijn demo-resultaten: ze zijn verzonnen en de links werken niet. Echte bronnen zijn nog niet gekoppeld."
+    />
+
+    <UAlert
       v-if="run.hiddenBlacklisted"
       color="neutral"
       variant="subtle"
