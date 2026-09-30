@@ -5,14 +5,24 @@ export default defineNuxtConfig({
     '@nuxt/ui'
   ],
 
+  // Internal staff tool behind a login: auth state lives in the browser, so no SSR
+  ssr: false,
+
   devtools: {
     enabled: true
   },
 
   css: ['~/assets/css/main.css'],
 
-  routeRules: {
-    '/': { prerender: true }
+  runtimeConfig: {
+    firebaseClientEmail: '',
+    firebasePrivateKey: '',
+    public: {
+      firebaseApiKey: '',
+      firebaseAuthDomain: '',
+      firebaseProjectId: '',
+      firebaseAppId: ''
+    }
   },
 
   compatibilityDate: '2026-06-30',

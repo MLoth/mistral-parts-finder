@@ -14,6 +14,8 @@
     "@iconify-json/lucide": "^1.2.137",
     "@iconify-json/simple-icons": "^1.2.97",
     "@nuxt/ui": "^4.11.2",
+    "firebase": "^12.19.0",
+    "firebase-admin": "^14.5.0",
     "nuxt": "^4.5.2",
     "tailwindcss": "^4.3.3"
   },

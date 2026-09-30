@@ -20,6 +20,13 @@ useSeoMeta({
   ogTitle: title,
   ogDescription: description
 })
+
+const { user, signOut } = useAuth()
+
+async function onSignOut() {
+  await signOut()
+  await navigateTo('/login')
+}
 </script>
 
 <template>
@@ -31,6 +38,13 @@ useSeoMeta({
 
       <template #right>
         <UColorModeButton />
+        <UButton
+          v-if="user"
+          label="Sign out"
+          color="neutral"
+          variant="ghost"
+          @click="onSignOut"
+        />
       </template>
     </UHeader>
 
