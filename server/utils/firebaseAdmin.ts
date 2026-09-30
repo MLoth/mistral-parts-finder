@@ -1,16 +1,18 @@
 import { cert, getApps, initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
+import { getFirestore } from 'firebase-admin/firestore'
 
-export function useFirebaseAdmin() {
+function useFirebaseApp() {
   const config = useRuntimeConfig()
 
-  const app = getApps()[0] ?? initializeApp({
+  return getApps()[0] ?? initializeApp({
     credential: cert({
       projectId: config.public.firebaseProjectId,
       clientEmail: config.firebaseClientEmail,
       privateKey: config.firebasePrivateKey.replace(/\\n/g, '\n')
     })
   })
-
-  return getAuth(app)
 }
+
+export const useFirebaseAdmin = () => getAuth(useFirebaseApp())
+export const useFirestore = () => getFirestore(useFirebaseApp())
