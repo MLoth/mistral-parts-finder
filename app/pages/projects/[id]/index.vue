@@ -165,12 +165,13 @@ async function savePart() {
           />
         </template>
         <template #actions-cell="{ row }">
-          <div class="flex justify-end">
+          <div class="flex items-center justify-end">
             <UButton
               :to="`/projects/${id}/parts/${row.original.id}`"
+              label="Zoeken"
               icon="i-lucide-search"
-              color="primary"
-              variant="ghost"
+              size="sm"
+              class="me-2"
               aria-label="Zoek dit onderdeel"
             />
             <UButton
