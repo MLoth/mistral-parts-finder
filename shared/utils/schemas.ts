@@ -20,3 +20,35 @@ export const partSchema = z.object({
   status: z.enum(PART_STATUSES).default('needed')
 })
 export type PartInput = z.infer<typeof partSchema>
+
+const imageSchema = z.object({
+  mediaType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
+  base64: z.string().min(1).max(3_000_000)
+})
+
+export const searchInputSchema = z.object({
+  description: z.string().trim().max(2000).default(''),
+  partNumber: z.string().trim().max(80).default(''),
+  info: z.string().trim().max(2000).default(''),
+  images: z.array(imageSchema).max(4).default([])
+}).refine(v => v.description || v.partNumber || v.info || v.images.length, {
+  message: 'Vul minstens een beschrijving, onderdeelnummer, extra informatie of foto in'
+})
+export type SearchInput = z.infer<typeof searchInputSchema>
+
+export const refineInputSchema = z.object({
+  answer: z.string().trim().max(2000).default(''),
+  images: z.array(imageSchema).max(4).default([])
+}).refine(v => v.answer || v.images.length, { message: 'Geef een antwoord of voeg een foto toe' })
+export type RefineInput = z.infer<typeof refineInputSchema>
+
+export const partAnalysisSchema = z.object({
+  partName: z.string(),
+  category: z.string(),
+  alternativeNames: z.array(z.string()),
+  possiblePartNumbers: z.array(z.string()),
+  confidence: z.enum(['low', 'medium', 'high']),
+  explanation: z.string(),
+  questions: z.array(z.string()),
+  searchQueries: z.array(z.string())
+})
