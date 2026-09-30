@@ -1,0 +1,5 @@
+- Build with Nuxt 4 and Nuxt UI.
+- Always use BUN as package manager
+- Always use the linter
+- Always communicate assumptions and decisions you made that were not specified in the requirements / by me
+- Always return a certain number on the certainty of a response: 0% - 100%
