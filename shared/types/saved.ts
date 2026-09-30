@@ -18,4 +18,6 @@ export type SavedResult = {
   savedBy: string
   result: SourceResult
   contacts: ContactEntry[]
+  sourceKey?: string
+  sourceRating?: import('./ratings').SourceRatingSummary | null
 }

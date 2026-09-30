@@ -21,6 +21,14 @@ const scoreColor = (n = 0) => (n >= 70 ? 'success' : n >= 40 ? 'warning' : 'neut
       description="De AI-beoordeling mislukte. De volgorde is een schatting op basis van de zoektermen."
     />
 
+    <UAlert
+      v-if="run.hiddenBlacklisted"
+      color="neutral"
+      variant="subtle"
+      icon="i-lucide-eye-off"
+      :description="`${run.hiddenBlacklisted} resultaten van geblokkeerde bronnen zijn verborgen.`"
+    />
+
     <div class="flex flex-wrap items-center gap-2 text-sm text-muted">
       <span>{{ run.results.length }} resultaten, beste eerst</span>
       <UBadge
@@ -51,6 +59,7 @@ const scoreColor = (n = 0) => (n >= 70 ? 'success' : n >= 40 ? 'warning' : 'neut
               v-if="r.price"
               class="font-semibold"
             >{{ money(r.price) }}</span>
+            <SourceScoreBadge :rating="r.sourceRating" />
             <UBadge
               v-if="r.score !== undefined"
               :label="`Match ${r.score}%`"

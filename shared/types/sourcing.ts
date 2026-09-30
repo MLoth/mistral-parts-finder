@@ -24,6 +24,11 @@ export type SourceResult = {
   score?: number
   /** Short explanation of the score */
   reason?: string
+  /** The AI's score before the source history was applied */
+  aiScore?: number
+  /** Identifies the shop or seller for ratings */
+  sourceKey?: string
+  sourceRating?: import('./ratings').SourceRatingSummary | null
 }
 
 export type SourceStatus = {
@@ -42,6 +47,8 @@ export type SourceRun = {
   statuses: SourceStatus[]
   /** Best first. `heuristic` means the AI ranking failed and a simple word match was used */
   ranking?: 'ai' | 'heuristic'
+  /** Results left out because the source is blacklisted */
+  hiddenBlacklisted?: number
   results: SourceResult[]
 }
 

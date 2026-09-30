@@ -3,6 +3,7 @@ import type { Part, Project } from '#shared/types/project'
 import type { PartSearch } from '#shared/types/search'
 import type { ContactOutcome, SavedResult } from '#shared/types/saved'
 import type { SourceResult } from '#shared/types/sourcing'
+import type { RatingReason, Verdict } from '#shared/types/ratings'
 
 const route = useRoute()
 const api = useApi()
@@ -53,6 +54,16 @@ async function addContact(id: string, entry: { note: string, outcome: ContactOut
     await refreshSaved()
   } catch (error) {
     toast.add({ title: 'Vastleggen mislukt', description: errorMessage(error), color: 'error' })
+  }
+}
+
+async function rateSource(id: string, rating: { verdict: Verdict, reasons: RatingReason[], note: string }) {
+  try {
+    await api(`${savedBase}/${id}/rating`, { method: 'POST', body: rating })
+    toast.add({ title: 'Beoordeling opgeslagen', description: 'Bij de volgende zoekopdracht telt deze bron mee in de volgorde.' })
+    await refreshSaved()
+  } catch (error) {
+    toast.add({ title: 'Beoordelen mislukt', description: errorMessage(error), color: 'error' })
   }
 }
 
@@ -167,6 +178,7 @@ async function adoptPartNumber(number: string) {
         :saved="saved"
         @remove="removeSaved"
         @contact="addContact"
+        @rate="rateSource"
       />
     </section>
 

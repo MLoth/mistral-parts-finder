@@ -63,3 +63,14 @@ export const contactSchema = z.object({
 export const rankingSchema = z.object({
   rankings: z.array(z.object({ index: z.number().int(), score: z.number(), reason: z.string() }))
 })
+
+export const ratingSchema = z.object({
+  verdict: z.enum(['good', 'bad']),
+  reasons: z.array(z.enum(['price', 'speed', 'reliability', 'quality', 'matched'])).max(5).default([]),
+  note: z.string().trim().max(500).default('')
+})
+
+export const sourceRatingPatchSchema = z.object({
+  blacklisted: z.boolean().optional(),
+  label: z.string().trim().min(1).max(80).optional()
+})
