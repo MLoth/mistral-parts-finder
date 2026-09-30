@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PartAnalysis } from '#shared/types/search'
 
-defineProps<{ analysis: PartAnalysis }>()
+defineProps<{ analysis: PartAnalysis, flat?: boolean }>()
 const CONFIDENCE = {
   low: { label: 'Lage zekerheid', color: 'warning' },
   medium: { label: 'Gemiddelde zekerheid', color: 'info' },
@@ -10,7 +10,10 @@ const CONFIDENCE = {
 </script>
 
 <template>
-  <div class="space-y-3 rounded-md border border-default p-4">
+  <div
+    class="space-y-3"
+    :class="flat ? '' : 'rounded-md border border-default p-4'"
+  >
     <div class="flex flex-wrap items-center gap-2">
       <h3 class="text-base">
         {{ analysis.partName }}
